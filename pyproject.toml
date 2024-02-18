@@ -1,16 +1,12 @@
 [project]
 name = "typing_ex"
-version = "0.1.0"
+version = "0.1.1"
 description = "A package for extended built-in types"
-authors = [
-    {name = "yusing", email = "yusing.wys@gmail.com"},
-]
-dependencies = [
-    "typing-extensions>=4.9.0",
-]
+authors = [{ name = "yusing", email = "yusing.wys@gmail.com" }]
+dependencies = ["typing-extensions>=4.9.0"]
 requires-python = ">=3.8"
 readme = "README.md"
-license = {text = "MIT"}
+license = { text = "MIT" }
 
 [project.optional-dependencies]
 dev = [
@@ -23,9 +19,7 @@ dev = [
     "coverage>=7.4.1",
     "mypy>=1.8.0",
 ]
-test = [
-    "pytest>=8.0.1",
-]
+test = ["pytest>=8.0.1"]
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
