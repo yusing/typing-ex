@@ -12,6 +12,7 @@ class TestEnum(EnumEx):
 
 
 def test_int_enum():
+    assert TestEnum.value_type is int
     assert TestEnum.A == 0
     assert TestEnum.B == 1
     assert TestEnum.C == 456
@@ -44,6 +45,10 @@ class TestStrEnum(EnumEx):
     BAZ_ALIAS = BAZ
 
 
+def test_value_type():
+    assert TestStrEnum.value_type is str
+
+
 def test_iter_enum():
     assert tuple(TestStrEnum) == (
         TestStrEnum.FOO,
@@ -70,11 +75,11 @@ def test_values():
 
 
 def test_enums():
-    assert list(TestStrEnum.enums) == [
+    assert TestStrEnum.enums == (
         TestStrEnum.FOO,
         TestStrEnum.BAR,
         TestStrEnum.BAZ,
         TestStrEnum.FOO_ALIAS,
         TestStrEnum.BAR_ALIAS,
         TestStrEnum.BAZ_ALIAS,
-    ], TestStrEnum.enums
+    ), TestStrEnum.enums

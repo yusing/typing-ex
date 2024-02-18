@@ -23,6 +23,7 @@ from typing import (
     get_origin,
     final,
 )
+from abc import abstractmethod
 from typing_extensions import Self, TypeAlias
 
 if sys.version_info < (3, 10):
@@ -31,8 +32,8 @@ else:
     from types import UnionType
 
 
-AnyType: TypeAlias = Union[Type, UnionType, None]
 AnyUnion: TypeAlias = Union[Type, UnionType, object]
+AnyType: TypeAlias = Union[Type, AnyUnion, None]
 __all__ = [
     "Any",
     "ClassVar",
@@ -58,5 +59,6 @@ __all__ = [
     "get_origin",
     "new_class",
     "final",
+    "abstractmethod",
     "MappingProxyType",
 ]

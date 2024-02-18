@@ -72,7 +72,7 @@ with open("test.json", "r") as f:
   - `EnumEx.names`: a tuple of all enum names.
   - `EnumEx.values`: a tuple of all enum values.
   - `EnumEx.enums`: a tuple of all enum instances.
-  - `EnumEx.value_type`: returns `__value_type__` if defined, int otherwise. 
+  - `EnumEx.value_type`: returns `__value_type__` if defined, int otherwise.
 
 ```python
 class AliasedEnum(EnumEx):

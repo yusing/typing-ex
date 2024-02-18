@@ -4,6 +4,7 @@ from typing_ex.builtin_typing import (
     Mapping,
     MappingProxyType,
     Optional,
+    Type,
     TypeAlias,
 )
 from typing_ex.type_info import TypeInfo
@@ -64,21 +65,23 @@ class TypedDefaultDictMeta(type):
             return type.__new__(mcs, name, bases, ns)
         return type.__new__(mcs, name, bases, _ns_handler(ns))
 
-    def __getattribute__(mcs, k: str):
-        if k == "_schema":
-            return super().__getattribute__(k)
-        if k in mcs._schema:
-            return mcs._schema[k].default
-        return super().__getattribute__(k)
+    def __getattr__(mcs, k: str):
+        if k not in mcs._schema:
+            raise AttributeError(k)
+        return mcs._schema[k].default
 
 
-class TypedDefaultDict(dict, metaclass=TypedDefaultDictMeta):
+# no more metaclass conflict warning from mypy
+_TypedDefaultDict: Type = type.__new__(type, "TypedDefaultDict", (dict,), {})
+
+
+class TypedDefaultDict(_TypedDefaultDict, metaclass=TypedDefaultDictMeta):
 
     @property
     def schema(self) -> Schema:
         return self._schema
 
-    def __init__(self, data: Optional[dict] = None, /, **kwargs):
+    def __init__(self, data: Optional[Mapping[str, Any]] = None, /, **kwargs):
         if data and kwargs:
             raise ValueError("data and kwargs cannot be used together")
         if data and not isinstance(data, Mapping):
@@ -116,6 +119,8 @@ class TypedDefaultDict(dict, metaclass=TypedDefaultDictMeta):
 
     @classmethod
     def _check_property(cls, k: str):
+        if not isinstance(k, str):
+            raise TypeError("property name must be a string")
         if k == _SCHEMA_ATTR:
             raise ReservedPropertyError(k)
         if k not in cls._schema:

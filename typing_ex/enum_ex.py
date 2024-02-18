@@ -1,19 +1,48 @@
 from enum import Enum
-from types import DynamicClassAttribute
 from typing_ex.builtin_typing import (
+    DynamicClassAttribute,
     Type,
     ClassVar,
     Dict,
     Tuple,
     final,
     Any,
+    abstractmethod,
 )
+
+
+"""
+Trick static type checker
+to recognize enum as EnumEx instead of __value_type__
+"""
+
+
+class EnumEx(Enum):
+    names: ClassVar[Tuple[str]]
+    values: ClassVar[Tuple]
+    enums: ClassVar[Tuple["_EnumEx"]]
+    value_type: ClassVar[Type]
+
+    @property
+    @abstractmethod
+    def name(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def value(self): ...
+
+    @property
+    @abstractmethod
+    def orig_name(self) -> str: ...
+    @property
+    @abstractmethod
+    def is_alias(self) -> bool: ...
 
 
 class _ClassStorage:
     name_value_dict: Dict[str, Any]
     value_name_dict: Dict[Any, str]
-    instances: Dict[str, "EnumEx"]
+    instances: Dict[str, "_EnumEx"]
     value_type: Type
 
     def __init__(self, value_type: Type, nv_dict: Dict[str, Any]) -> None:
@@ -29,9 +58,9 @@ class _ClassStorage:
                 )
             if v not in self.value_name_dict:
                 self.value_name_dict[v] = k
-                self.instances[k] = EnumEx.__create__(k, v, k)
+                self.instances[k] = _EnumEx.__create__(k, v, k)
                 continue
-            self.instances[k] = EnumEx.__create__(k, v, self.value_name_dict[v])
+            self.instances[k] = _EnumEx.__create__(k, v, self.value_name_dict[v])
 
 
 class EnumExMeta(type):
@@ -45,15 +74,13 @@ class EnumExMeta(type):
         attrs["__storage__"] = _ClassStorage(value_type, nv_dict)
         return type.__new__(mcs, name, bases, attrs)
 
-    def __getattribute__(mcs: "EnumEx", k: str):
-        if k.startswith("__") or k in ["names", "values", "enums", "value_type"]:
-            return type.__getattribute__(mcs, k)
+    def __getattr__(mcs, k: str):
         cls_storage = mcs.__storage__
         if k not in cls_storage.instances:
             raise AttributeError(k)
         return cls_storage.instances[k]
 
-    def __iter__(mcs: "EnumEx"):
+    def __iter__(mcs):
         """Iterate through non-alias enums"""
         cls_storage = mcs.__storage__
         for v in cls_storage.instances.values():
@@ -82,6 +109,11 @@ class _EnumEx(metaclass=EnumExMeta):
     __slots__ = ("_name", "_value", "_orig_name")
     __value_type__: ClassVar[Type]
     __test__: ClassVar[bool] = False
+
+    names: ClassVar[Tuple[str]]
+    values: ClassVar[Tuple]
+    enums: ClassVar[Tuple["_EnumEx"]]
+    value_type: ClassVar[Type]
 
     @property
     def name(self) -> str:
@@ -141,23 +173,5 @@ class _EnumEx(metaclass=EnumExMeta):
         self._orig_name = orig_name
 
 
-"""
-Trick static type checker
-to recognize enum as EnumEx instead of __value_type__
-"""
-
-
-class EnumEx(Enum):
-
-    @property
-    def name(self) -> str: ...
-    @property
-    def value(self): ...
-
-    @property
-    def orig_name(self) -> str: ...
-    @property
-    def is_alias(self) -> bool: ...
-
-
-EnumEx = _EnumEx  # noqa: F811
+EnumEx = _EnumEx  # type: ignore[misc,assignment] # noqa: F811
+EnumEx.__doc__ = Enum.__doc__
