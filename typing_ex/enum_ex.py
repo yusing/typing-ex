@@ -3,6 +3,7 @@ from typing_ex.builtin_typing import (
     DynamicClassAttribute,
     Type,
     ClassVar,
+    Callable,
     Dict,
     Tuple,
     final,
@@ -42,12 +43,15 @@ class EnumEx(Enum):
 class _ClassStorage:
     name_value_dict: Dict[str, Any]
     value_name_dict: Dict[Any, str]
-    instances: Dict[str, "_EnumEx"]
+    name_orig_name_dict: Dict[str, str]
     value_type: Type
+    instances: Dict[str, "EnumEx"]
+    class_: Type
 
     def __init__(self, value_type: Type, nv_dict: Dict[str, Any]) -> None:
         self.name_value_dict = nv_dict
         self.value_name_dict = {}
+        self.name_orig_name_dict = {}
         self.instances = {}
         self.value_type = value_type
         for k, v in nv_dict.items():
@@ -58,13 +62,18 @@ class _ClassStorage:
                 )
             if v not in self.value_name_dict:
                 self.value_name_dict[v] = k
-                self.instances[k] = _EnumEx.__create__(k, v, k)
+                self.name_orig_name_dict[k] = k
                 continue
-            self.instances[k] = _EnumEx.__create__(k, v, self.value_name_dict[v])
+            self.name_orig_name_dict[k] = self.value_name_dict[v]
 
+    def init_instances(self):
+        for k, v in self.name_value_dict.items():
+            self.instances[k] = self.class_.__create__(k, v, self.name_orig_name_dict[k])
 
 class EnumExMeta(type):
     def __new__(mcs, name: str, bases: Tuple[type, ...], attrs: Dict[str, Any]):
+        if name == "EnumExMeta":
+            return type.__new__(mcs, name, bases, attrs)
         value_type = attrs.pop("__value_type__", None) or int
         nv_dict = {}
         for attr, v in attrs.items():
@@ -72,7 +81,10 @@ class EnumExMeta(type):
                 nv_dict[attr] = v
         attrs = {k: v for k, v in attrs.items() if k not in nv_dict}
         attrs["__storage__"] = _ClassStorage(value_type, nv_dict)
-        return type.__new__(mcs, name, bases, attrs)
+        tp_enum = type.__new__(mcs, name, bases, attrs)
+        tp_enum.__storage__.class_ = tp_enum
+        tp_enum.__storage__.init_instances()
+        return tp_enum
 
     def __getattr__(mcs, k: str):
         cls_storage = mcs.__storage__
@@ -112,7 +124,7 @@ class _EnumEx(metaclass=EnumExMeta):
 
     names: ClassVar[Tuple[str]]
     values: ClassVar[Tuple]
-    enums: ClassVar[Tuple["_EnumEx"]]
+    enums: ClassVar[Tuple["EnumEx"]]
     value_type: ClassVar[Type]
 
     @property
@@ -173,5 +185,7 @@ class _EnumEx(metaclass=EnumExMeta):
         self._orig_name = orig_name
 
 
-EnumEx = _EnumEx  # type: ignore[misc,assignment] # noqa: F811
+from .builtin_typing import new_class
+
+EnumEx = new_class("EnumEx", (_EnumEx,))  # type: ignore[misc,assignment] # noqa: F811
 EnumEx.__doc__ = Enum.__doc__

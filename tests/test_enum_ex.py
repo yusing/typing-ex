@@ -44,9 +44,20 @@ class TestStrEnum(EnumEx):
     BAR_ALIAS = BAR
     BAZ_ALIAS = BAZ
 
+    _private_attr = "abc"
+
+    @property
+    def custom_prop(self):
+        return 123
+
 
 def test_value_type():
     assert TestStrEnum.value_type is str
+
+
+def test_non_enum_attrs():
+    assert TestStrEnum._private_attr == "abc"
+    assert TestStrEnum.FOO.custom_prop == 123
 
 
 def test_iter_enum():

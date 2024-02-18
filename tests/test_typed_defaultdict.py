@@ -36,3 +36,34 @@ def test_init_getattr_getitem():
 def test_invalid_property_type():
     with pytest.raises(PropertyValueError):
         Dict(image="foo", mounts=["foo", 1])
+
+
+class DictWithPropertiesAndMethods(TypedDefaultDict):
+    foo: str = "foo"
+    bar: str = "bar"
+
+    @property
+    def foo_bar(self) -> str:
+        return self.foo + self.bar
+
+    def foo_bar_method(self) -> str:
+        return self.foo + self.bar
+
+    @classmethod
+    def foo_bar_cls_method(cls) -> str:
+        return cls.foo + cls.bar
+
+    @staticmethod
+    def foo_bar_static_method() -> str:
+        return DictWithPropertiesAndMethods.foo + DictWithPropertiesAndMethods.bar
+
+
+def test_properties_and_methods():
+
+    assert DictWithPropertiesAndMethods.foo_bar_cls_method() == "foobar"
+    assert DictWithPropertiesAndMethods.foo_bar_static_method() == "foobar"
+    test_dict = DictWithPropertiesAndMethods(foo="bar", bar="foo")
+    assert test_dict.foo_bar == "barfoo"
+    assert test_dict.foo_bar_method() == "barfoo"
+    assert test_dict.foo_bar_cls_method() == "foobar"
+    assert test_dict.foo_bar_static_method() == "foobar"
