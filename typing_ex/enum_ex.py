@@ -3,12 +3,12 @@ from typing_ex.builtin_typing import (
     DynamicClassAttribute,
     Type,
     ClassVar,
-    Callable,
     Dict,
     Tuple,
     final,
     Any,
     abstractmethod,
+    new_class,
 )
 
 
@@ -35,6 +35,7 @@ class EnumEx(Enum):
     @property
     @abstractmethod
     def orig_name(self) -> str: ...
+
     @property
     @abstractmethod
     def is_alias(self) -> bool: ...
@@ -68,7 +69,10 @@ class _ClassStorage:
 
     def init_instances(self):
         for k, v in self.name_value_dict.items():
-            self.instances[k] = self.class_.__create__(k, v, self.name_orig_name_dict[k])
+            self.instances[k] = self.class_.__create__(
+                k, v, self.name_orig_name_dict[k]
+            )
+
 
 class EnumExMeta(type):
     def __new__(mcs, name: str, bases: Tuple[type, ...], attrs: Dict[str, Any]):
@@ -140,6 +144,10 @@ class _EnumEx(metaclass=EnumExMeta):
         return self._orig_name
 
     @property
+    def origin(self) -> "EnumEx":
+        return self.__class__.__storage__.instances[self._orig_name]
+
+    @property
     def is_alias(self) -> bool:
         return self._orig_name != self._name
 
@@ -184,8 +192,6 @@ class _EnumEx(metaclass=EnumExMeta):
         self._value = value
         self._orig_name = orig_name
 
-
-from .builtin_typing import new_class
 
 EnumEx = new_class("EnumEx", (_EnumEx,))  # type: ignore[misc,assignment] # noqa: F811
 EnumEx.__doc__ = Enum.__doc__

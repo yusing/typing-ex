@@ -1,6 +1,6 @@
 [project]
 name = "typing_ex"
-version = "0.1.3"
+version = "0.1.31"
 description = "A package for extended built-in types"
 authors = [{ name = "yusing", email = "yusing.wys@gmail.com" }]
 dependencies = ["typing-extensions>=4.9.0"]

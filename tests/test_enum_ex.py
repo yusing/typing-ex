@@ -25,6 +25,8 @@ def test_int_enum():
     assert TestEnum.A_ALIAS2.name == "A_ALIAS2"
     assert TestEnum.A_ALIAS.orig_name == "A"
     assert TestEnum.B_ALIAS.orig_name == "B"
+    assert TestEnum.A_ALIAS.origin == TestEnum.A
+    assert TestEnum.B_ALIAS.origin == TestEnum.B
     assert TestEnum.A < TestEnum.B
     assert TestEnum.A < TestEnum.C
     assert TestEnum.A != TestEnum.B
