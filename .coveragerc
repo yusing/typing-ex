@@ -1,0 +1,3 @@
+[run]
+omit =
+    src/typing_ex/builtin_typing.py
