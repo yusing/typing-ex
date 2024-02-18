@@ -31,7 +31,6 @@ def test_int_enum():
     assert TestEnum.B != TestEnum.C
     assert TestEnum.A == TestEnum.A
     assert TestEnum.C == TestEnum.C
-    assert tuple(TestEnum) == ("A", "B", "C")  # aliases are skipped
     assert TestEnum.values == (0, 1, 456), TestEnum.values
 
 
@@ -45,6 +44,37 @@ class TestStrEnum(EnumEx):
     BAZ_ALIAS = BAZ
 
 
-def test_override_value_type():
-    assert tuple(TestStrEnum) == ("FOO", "BAR", "BAZ")  # aliases are skipped
+def test_iter_enum():
+    assert tuple(TestStrEnum) == (
+        TestStrEnum.FOO,
+        TestStrEnum.BAR,
+        TestStrEnum.BAZ,
+    ), tuple(
+        TestStrEnum
+    )  # aliases are skipped
+
+
+def test_names():
+    assert TestStrEnum.names == (
+        "FOO",
+        "BAR",
+        "BAZ",
+        "FOO_ALIAS",
+        "BAR_ALIAS",
+        "BAZ_ALIAS",
+    ), TestStrEnum.names
+
+
+def test_values():
     assert TestStrEnum.values == ("foo", "bar", "baz"), TestStrEnum.values
+
+
+def test_enums():
+    assert list(TestStrEnum.enums) == [
+        TestStrEnum.FOO,
+        TestStrEnum.BAR,
+        TestStrEnum.BAZ,
+        TestStrEnum.FOO_ALIAS,
+        TestStrEnum.BAR_ALIAS,
+        TestStrEnum.BAZ_ALIAS,
+    ], TestStrEnum.enums

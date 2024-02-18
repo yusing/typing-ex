@@ -1,4 +1,3 @@
-from __future__ import annotations
 import sys
 from typing_ex.builtin_typing import (
     Type,
@@ -10,8 +9,11 @@ from typing_ex.builtin_typing import (
     Callable,
     Mapping,
     Sequence,
+    Tuple,
+    Dict,
     Any,
     AnyType,
+    AnyUnion,
     get_args,
     get_origin,
 )
@@ -26,9 +28,9 @@ class TypeInfoMeta(type):
 
 
 class TypeInfo(type, metaclass=TypeInfoMeta):
-    _instances: dict[type, "TypeInfo"] = {}
-    _type_name_dict: dict[type, str] = {}
-    _info: dict[str, Any]
+    _instances: Dict[type, "TypeInfo"] = {}
+    _type_name_dict: Dict[type, str] = {}
+    _info: Dict[str, Any]
 
     __test__ = False
 
@@ -63,7 +65,7 @@ class TypeInfo(type, metaclass=TypeInfoMeta):
         return cls._info["origin"]
 
     @property
-    def args(cls) -> tuple[Any, ...]:
+    def args(cls) -> Tuple[Any, ...]:
         return cls._info["args"]
 
     @property
@@ -87,9 +89,7 @@ class TypeInfo(type, metaclass=TypeInfoMeta):
         return issubclass(cls.origin, Sequence)
 
     @staticmethod
-    def check_union(
-        t1: Type | UnionType | object, t2: Type | UnionType | object
-    ) -> bool:
+    def check_union(t1: AnyUnion, t2: AnyUnion) -> bool:
         if TypeInfo._is_union_type(t1, t1):
             t1_args = get_args(t1)
             t2_args = get_args(t2)
@@ -129,8 +129,8 @@ class TypeInfo(type, metaclass=TypeInfoMeta):
 
     @staticmethod
     def _check_args(
-        args1: tuple[AnyType, ...],
-        types_or_values: tuple[_ValueType, ...],
+        args1: Tuple[AnyType, ...],
+        types_or_values: Tuple[_ValueType, ...],
         check_fn: Callable[[AnyType, _ValueType], bool],
     ):
         if not args1:
@@ -142,7 +142,7 @@ class TypeInfo(type, metaclass=TypeInfoMeta):
         )
 
     @staticmethod
-    def _check_values(args: tuple[AnyType, ...], values: tuple[_ValueType, ...]):
+    def _check_values(args: Tuple[AnyType, ...], values: Tuple[_ValueType, ...]):
         return TypeInfo._check_args(
             args, values, lambda arg, value: TypeInfo[arg].check_value(value)
         )
@@ -157,7 +157,7 @@ class TypeInfo(type, metaclass=TypeInfoMeta):
             yield item if isinstance(item, Iterable) else [item]
 
     @staticmethod
-    def _type_name(t, origin, args):
+    def _type_name(t, origin: AnyType, args: Tuple[AnyType, ...]):
         if t is None:
             return "None"
         if t in TypeInfo._type_name_dict:
@@ -170,7 +170,7 @@ class TypeInfo(type, metaclass=TypeInfoMeta):
         return t_name
 
     @staticmethod
-    def _is_union_type(t_cls, t_origin):
+    def _is_union_type(t_cls: AnyType, t_origin: AnyType):
         if sys.version_info >= (3, 10):
             return isinstance(t_cls, UnionType) or get_origin(t_origin) is Union
         return get_origin(t_cls) is Union or get_origin(t_origin) is Union

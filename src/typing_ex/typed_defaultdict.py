@@ -1,4 +1,3 @@
-import sys
 from typing_ex.builtin_typing import (
     Any,
     NamedTuple,
@@ -15,10 +14,7 @@ PropertyDVTTuple = NamedTuple(
     "PropertyDVTTuple", [("default", Any), ("type", TypeInfo)]
 )
 
-if sys.version_info >= (3, 10):
-    Schema: TypeAlias = MappingProxyType[str, PropertyDVTTuple]
-else:
-    Schema: TypeAlias = MappingProxyType
+Schema: TypeAlias = "MappingProxyType[str, PropertyDVTTuple]"
 
 
 class PropertyValueError(Exception):
@@ -27,7 +23,8 @@ class PropertyValueError(Exception):
         self.value = value
         self.expected_type = expected_type
         super().__init__(
-            f"value for property '{property_name}' is not of type {expected_type.name}"
+            f"value for property '{property_name}'"
+            "is not of type {expected_type.name}"
         )
 
 
@@ -49,7 +46,8 @@ def _ns_handler(ns: dict):
     }  # filter out private members
     if any(isinstance(annotation, str) for annotation in annotations.values()):
         raise RuntimeError(
-            "TypedDefaultDict cannot be used with 'from __future__ import annotations'"
+            "TypedDefaultDict cannot be used with "
+            "'from __future__ import annotations'"
         )
     schema = {
         k: PropertyDVTTuple(ns.get(k), TypeInfo[annotations[k]])

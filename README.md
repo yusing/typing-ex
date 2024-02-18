@@ -20,6 +20,7 @@ Notice: *yet to be heavily tested*, only simple tests are passed.
   - `TypeInfo.check_union(t1, t2)`: check if union type t1 fulfill union type t2
   - `TypeInfo[...].check_value(value)`: check if value matches the type in type info
   - `TypeInfo[...].is_*`: check if type is _
+
 ```python
 # type_a | type_b is only supported when python >= 3.10
 TypeInfo[list[int | str]].name # list[int | str]
@@ -67,14 +68,19 @@ with open("test.json", "r") as f:
 ## EnumEx *[enum_ex.py](src/typing_ex/enum_ex.py)*
 
 - `EnumEx` is a `Enum` like class that support enum aliasing (keeping same value but different name).
+  - `EnumEx.__iter__`: a generator of all non-alias enum instances.
+  - `EnumEx.names`: a tuple of all enum names.
+  - `EnumEx.values`: a tuple of all enum values.
+  - `EnumEx.enums`: a tuple of all enum instances.
+  - `EnumEx.value_type`: returns `__value_type__` if defined, int otherwise. 
 
 ```python
 class AliasedEnum(EnumEx):
     __value_type__ = str # default is int
     foo = "1"
-    foo2 = foo
+    foo2 = foo # alias
     bar = "2"
-    bar2 = bar
+    bar2 = bar # alias
 
 foo.name # "foo"
 foo.value # 1

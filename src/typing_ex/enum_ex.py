@@ -1,62 +1,86 @@
-from __future__ import annotations
+from enum import Enum
 from types import DynamicClassAttribute
-from typing_ex.builtin_typing import TypeAlias, ClassVar, final, Any
+from typing_ex.builtin_typing import (
+    Type,
+    ClassVar,
+    Dict,
+    Tuple,
+    final,
+    Any,
+)
+
+
+class _ClassStorage:
+    name_value_dict: Dict[str, Any]
+    value_name_dict: Dict[Any, str]
+    instances: Dict[str, "EnumEx"]
+    value_type: Type
+
+    def __init__(self, value_type: Type, nv_dict: Dict[str, Any]) -> None:
+        self.name_value_dict = nv_dict
+        self.value_name_dict = {}
+        self.instances = {}
+        self.value_type = value_type
+        for k, v in nv_dict.items():
+            if not isinstance(v, value_type):
+                raise ValueError(
+                    f"Enum {k} has a value {v} "
+                    "which is not of type of {value_type.__name__}"
+                )
+            if v not in self.value_name_dict:
+                self.value_name_dict[v] = k
+                self.instances[k] = EnumEx.__create__(k, v, k)
+                continue
+            self.instances[k] = EnumEx.__create__(k, v, self.value_name_dict[v])
 
 
 class EnumExMeta(type):
-    def __new__(mcs, name: str, bases: tuple[type, ...], attrs: dict[str, Any]):
-        if not bases:
-            return type.__new__(mcs, name, bases, attrs)
-        attrs.setdefault("__value_type__", int)
-        value_type = attrs["__value_type__"]
-        cls_storage = {}
-        cls_storage["enums"] = enums = {
-            attr: v for attr, v in attrs.items() if attr[0] != "_" and attr.isupper()
-        }
-        cls_storage["value_dict"] = value_dict = {}
-        cls_storage["objs"] = {}
-        attrs["__storage__"] = cls_storage
-        for k, v in enums.items():
-            if not isinstance(v, value_type):
-                raise ValueError(f"Value {v} is not of type {value_type.__name__}")
-            if v not in value_dict:
-                value_dict[v] = k
+    def __new__(mcs, name: str, bases: Tuple[type, ...], attrs: Dict[str, Any]):
+        value_type = attrs.pop("__value_type__", None) or int
+        nv_dict = {}
+        for attr, v in attrs.items():
+            if attr[0] != "_" and attr.isupper():
+                nv_dict[attr] = v
+        attrs = {k: v for k, v in attrs.items() if k not in nv_dict}
+        attrs["__storage__"] = _ClassStorage(value_type, nv_dict)
         return type.__new__(mcs, name, bases, attrs)
 
-    def __getattribute__(mcs, k: str):
-        if k[0] == "_" or k in ["names", "values"]:
+    def __getattribute__(mcs: "EnumEx", k: str):
+        if k.startswith("__") or k in ["names", "values", "enums", "value_type"]:
             return type.__getattribute__(mcs, k)
         cls_storage = mcs.__storage__
-        if k not in cls_storage["enums"]:
+        if k not in cls_storage.instances:
             raise AttributeError(k)
-        if k in cls_storage["objs"]:
-            return cls_storage["objs"][k]
-        v = cls_storage["enums"][k]
-        obj = mcs._create(k, v, cls_storage["value_dict"][v])
-        cls_storage["objs"][k] = obj
-        return obj
+        return cls_storage.instances[k]
 
-    def __iter__(mcs):
+    def __iter__(mcs: "EnumEx"):
         """Iterate through non-alias enums"""
         cls_storage = mcs.__storage__
-        for k, v in cls_storage["enums"].items():
-            if cls_storage["value_dict"][v] != k:
-                continue
-            yield k
+        for v in cls_storage.instances.values():
+            if v.name == v.orig_name:
+                yield v
 
     @DynamicClassAttribute
-    def names(cls) -> tuple[str]:
-        return tuple(cls)
+    def names(cls):
+        return tuple(cls.__storage__.instances.keys())
 
     @DynamicClassAttribute
     def values(cls):
-        return tuple(cls.__storage__["value_dict"].keys())
+        return tuple(cls.__storage__.value_name_dict.keys())
+
+    @DynamicClassAttribute
+    def enums(cls):
+        return tuple(cls.__storage__.instances.values())
+
+    @DynamicClassAttribute
+    def value_type(cls) -> Type:
+        """all enums"""
+        return cls.__storage__.value_type
 
 
-class EnumEx(metaclass=EnumExMeta):
+class _EnumEx(metaclass=EnumExMeta):
     __slots__ = ("_name", "_value", "_orig_name")
-    __value_type__: TypeAlias = int
-    __storage__: ClassVar[dict[str, Any]]
+    __value_type__: ClassVar[Type]
     __test__: ClassVar[bool] = False
 
     @property
@@ -64,7 +88,7 @@ class EnumEx(metaclass=EnumExMeta):
         return self._name
 
     @property
-    def value(self) -> __value_type__:
+    def value(self):
         return self._value
 
     @property
@@ -76,18 +100,24 @@ class EnumEx(metaclass=EnumExMeta):
         return self._orig_name != self._name
 
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, EnumEx):
+        if isinstance(other, self.__class__):
             return self._value == other._value
-        if isinstance(other, self.__value_type__):
+        if isinstance(other, self.__class__.value_type):
             return self._value == other
-        raise ValueError(f"cannot compare enum with {other.__class__.__name__}")
+        raise ValueError(
+            f"cannot compare enum of {self.__class__.value_type.__name__} "
+            f"with {other.__class__.__name__}"
+        )
 
     def __lt__(self, other: object) -> bool:
-        if isinstance(other, EnumEx):
+        if isinstance(other, self.__class__):
             return self._value < other._value
-        if isinstance(other, self.__value_type__):
+        if isinstance(other, self.__class__.value_type):
             return self._value < other
-        raise ValueError(f"cannot compare enum with {other.__class__.__name__}")
+        raise ValueError(
+            f"cannot compare enum of {self.__class__.value_type.__name__} "
+            f"with {other.__class__.__name__}"
+        )
 
     def __hash__(self) -> int:
         return hash(f"{self.name}:{self.value}")
@@ -99,13 +129,35 @@ class EnumEx(metaclass=EnumExMeta):
 
     @final
     @classmethod
-    def _create(cls, *args):
+    def __create__(cls, *args):
         obj = object.__new__(cls)
         cls.__init__(obj, *args)
         return obj
 
     @final
-    def __init__(self, name: str, value: __value_type__, orig_name: str) -> None:
+    def __init__(self, name: str, value, orig_name: str) -> None:
         self._name = name
         self._value = value
         self._orig_name = orig_name
+
+
+"""
+Trick static type checker
+to recognize enum as EnumEx instead of __value_type__
+"""
+
+
+class EnumEx(Enum):
+
+    @property
+    def name(self) -> str: ...
+    @property
+    def value(self): ...
+
+    @property
+    def orig_name(self) -> str: ...
+    @property
+    def is_alias(self) -> bool: ...
+
+
+EnumEx = _EnumEx  # noqa: F811

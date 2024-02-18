@@ -17,23 +17,22 @@ from typing import (
     Generic,
     Optional,
     Dict,
+    Tuple,
     overload,
     get_args,
     get_origin,
     final,
 )
+from typing_extensions import Self, TypeAlias
 
 if sys.version_info < (3, 10):
-    from typing_extensions import TypeAlias
-
-    UnionType = NewType("UnionType", Union)
+    UnionType = NewType("UnionType", Union)  # dummy type
 else:
-    from typing import TypeAlias
     from types import UnionType
 
 
 AnyType: TypeAlias = Union[Type, UnionType, None]
-
+AnyUnion: TypeAlias = Union[Type, UnionType, object]
 __all__ = [
     "Any",
     "ClassVar",
@@ -41,6 +40,7 @@ __all__ = [
     "Dict",
     "NamedTuple",
     "NewType",
+    "Tuple",
     "Type",
     "TypeVar",
     "TypeAlias",
@@ -52,6 +52,7 @@ __all__ = [
     "Callable",
     "Generic",
     "Optional",
+    "Self",
     "overload",
     "get_args",
     "get_origin",
