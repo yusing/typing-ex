@@ -83,7 +83,7 @@ foo2.name # "foo2"
 foo2.value # 1
 foo2.orig_name # "foo"
 
-bar2.name # "bar"
+bar2.name # "bar2"
 bar2.value # 2
 bar2.orig_name # "bar"
 ```
