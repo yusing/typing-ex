@@ -25,7 +25,7 @@ class PropertyValueError(Exception):
         self.expected_type = expected_type
         super().__init__(
             f"value for property '{property_name}'"
-            "is not of type {expected_type.name}"
+            f"is not of type {expected_type.name}"
         )
 
 
@@ -81,58 +81,70 @@ class TypedDefaultDict(_TypedDefaultDict, metaclass=TypedDefaultDictMeta):
     def schema(self) -> Schema:
         return self._schema
 
-    def __init__(self, data: Optional[Mapping[str, Any]] = None, /, **kwargs):
+    def update(self, fields: Optional[Mapping[str, Any]] = None, /, **kwargs):
+        super().update(self._get_fields(fields, **kwargs))
+
+    def on_get_unknown_property(self, k) -> Any:
+        raise UnknownPropertyError(k)
+
+    def on_set_unknown_property(self, k: str, v: Any) -> Any:
+        raise UnknownPropertyError(k)
+
+    def set(self, k: str, v: Any) -> None:
+        super().__setitem__(k, v)
+
+    def __init__(self, fields: Optional[Mapping[str, Any]] = None, /, **kwargs):
+        super().__init__(self._get_fields(fields, **kwargs))
+
+    def __getitem__(self, k: str):
+        if k in self:
+            return super().__getitem__(k)
+        if k in self._schema:
+            return self._schema[k].default
+        return self.on_get_unknown_property(k)
+
+    def __setitem__(self, k: str, v: Any):
+        if self._check_property(k):
+            self._check_value_type(k, v)
+            super().__setitem__(k, v)
+            return
+        v = self.on_set_unknown_property(k, v)
+        if v is not None:
+            super().__setitem__(k, v)
+
+    __getattr__ = __getitem__
+    __setattr__ = __setitem__
+
+    def _check_property(self, k: str) -> bool:
+        if not isinstance(k, str):
+            raise TypeError("property name must be a string")
+        if k == _SCHEMA_ATTR:
+            raise ReservedPropertyError(k)
+        return k in self._schema
+
+    def _check_value_type(self, k: str, v: Any):
+        if not self._schema[k].type.check_value(v):
+            raise PropertyValueError(k, v, self._schema[k].type)
+
+    def _verify_data(self, data: Mapping[str, Any]) -> Mapping[str, Any]:
+        remove_keys = []
+        for k, v in data.items():
+            if self._check_property(k):
+                self._check_value_type(k, v)
+                continue
+            v = self.on_set_unknown_property(k, v)
+            if v is None:
+                remove_keys.append(k)
+            else:
+                data[k] = v
+        return {k: v for k, v in data.items() if k not in remove_keys}
+
+    def _get_fields(
+        self, data: Optional[Mapping[str, Any]] = None, /, **kwargs
+    ) -> Mapping[str, Any]:
         if data and kwargs:
             raise ValueError("data and kwargs cannot be used together")
         if data and not isinstance(data, Mapping):
             raise TypeError("data must be a mapping")
         else:
-            data = data or kwargs
-        if not data:
-            raise ValueError("data or kwargs must be provided")
-        self._verify_data(data)
-        super().__init__(data)
-
-    def __getattr__(self, k: str):
-        if k in self._schema:
-            return self.__getitem__(k)
-        return super().__getattribute__(k)
-
-    def __setattr__(self, k: str, v: Any):
-        if k == _SCHEMA_ATTR:
-            raise ReservedPropertyError(k)
-        if k in self._schema:
-            self.__setitem__(k, v)
-            return
-        super().__setattr__(k, v)
-
-    def __getitem__(self, k: str):
-        self._check_property(k)
-        if k in self:
-            return super().__getitem__(k)
-        return self._schema[k].default
-
-    def __setitem__(self, k: str, v: Any):
-        self._check_property(k)
-        self._check_value_type(k, v)
-        super().__setitem__(k, v)
-
-    @classmethod
-    def _check_property(cls, k: str):
-        if not isinstance(k, str):
-            raise TypeError("property name must be a string")
-        if k == _SCHEMA_ATTR:
-            raise ReservedPropertyError(k)
-        if k not in cls._schema:
-            raise UnknownPropertyError(k)
-
-    @classmethod
-    def _check_value_type(cls, k: str, v: Any):
-        if not cls._schema[k].type.check_value(v):
-            raise PropertyValueError(k, v, cls._schema[k].type)
-
-    @classmethod
-    def _verify_data(cls, data: Mapping[str, Any]):
-        for k, v in data.items():
-            cls._check_property(k)
-            cls._check_value_type(k, v)
+            return self._verify_data(data or kwargs or {})

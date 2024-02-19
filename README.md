@@ -39,7 +39,17 @@ TypeInfo[list[int | str]].check_value([1.0, "2", 3]) # False
 
 ## TypedDefaultDict *[typed_defaultdict.py](src/typing_ex/typed_defaultdict.py)*
 
-- `TypedDefaultDict`: combining features of `TypedDict` and `defaultdict` with type checking in `__init__`, `__setitem__` and `__setattr__`
+- `TypedDefaultDict`: combining features of `TypedDict` and `defaultdict` with type checking in `__init__`, `__setitem__`, `__setattr__` and `update`
+  - `TypedDefaultDict.schema`: the schema dictionary: `MappingProxyType[str, NamedTuple[default: Any, type:TypeInfo]]`
+  - `TypedDefaultDict.on_get_unknown_property`: called on getting unknown property
+  - `TypedDefaultDict.on_set_unknown_property`: called on setting unknown property
+  - `TypedDefaultDict.set`: set a property to a value without property check and type check
+
+- Attributes without type annotation or starting with underscore "_" will be treated as class variables
+
+- You can override `on_get_unknown_property` and `on_set_unknown_property` to override the behavior when getting or setting unknown property, raises `UnknownPropertyError` by default.
+  - `on_get_unknown_property(k)`: either raise an error or return a value based on k
+  - `on_set_unknown_property(k, v)`: raise an error / return a value based on `(k, v)` to set `k` to new value / process and return `None` to ignore
 
 - Good for writing schema as a class for `JSON`/`YAML`/`XML`/etc. data which provides both static and runtime type checking.
 
@@ -63,6 +73,22 @@ testdict = TestDict( # raises `PropertyValueError`
 with open("test.json", "r") as f:
     # will also check on init
     testdict = TestDict(json.load(f))
+
+# example overriding on_*_unknown_property
+class TestDict(TypedDefaultDict):
+    foo: str = "foo"
+    bar: str = "bar"
+
+    _extra_props: dict[str, Any] = {} # class variable
+
+    @override
+    def on_get_unknown_property(self, k) -> Any:
+        raise AttributeError(k)
+
+    @override
+    def on_set_unknown_property(self, k: str, v: Any) -> Any:
+        self._extra_props[k] = v
+        return None
 ```
 
 ## EnumEx *[enum_ex.py](src/typing_ex/enum_ex.py)*
@@ -73,6 +99,11 @@ with open("test.json", "r") as f:
   - `EnumEx.values`: a tuple of all enum values.
   - `EnumEx.enums`: a tuple of all enum instances.
   - `EnumEx.value_type`: returns `__value_type__` if defined, int otherwise.
+
+  - `EnumEx.X.value`: value of enum X
+  - `EnumEx.X.name`: name of enum X (i.e. X)
+  - `EnumEx.X_ALIAS.orig_name`: original name of enum X_ALIAS (i.e. X)
+  - `EnumEx.X_ALIAS.origin`: origin enum of X_ALIAS (i.e. EnumEx.X)
 
 ```python
 class AliasedEnum(EnumEx):

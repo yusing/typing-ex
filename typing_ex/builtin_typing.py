@@ -16,6 +16,7 @@ from typing import (
     Callable,
     Generic,
     Optional,
+    List,
     Dict,
     Tuple,
     overload,
@@ -24,7 +25,7 @@ from typing import (
     final,
 )
 from abc import abstractmethod
-from typing_extensions import Self, TypeAlias
+from typing_extensions import Self, TypeAlias, override
 
 if sys.version_info < (3, 10):
     UnionType = NewType("UnionType", Union)  # dummy type
@@ -39,6 +40,7 @@ __all__ = [
     "ClassVar",
     "DynamicClassAttribute",
     "Dict",
+    "List",
     "NamedTuple",
     "NewType",
     "Tuple",
@@ -55,6 +57,7 @@ __all__ = [
     "Optional",
     "Self",
     "overload",
+    "override",
     "get_args",
     "get_origin",
     "new_class",
