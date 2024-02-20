@@ -59,7 +59,7 @@ class _ClassStorage:
             if not isinstance(v, value_type):
                 raise ValueError(
                     f"Enum {k} has a value {v} "
-                    "which is not of type of {value_type.__name__}"
+                    "which does not match __value_type__: '{value_type.__name__}'"
                 )
             if v not in self.value_name_dict:
                 self.value_name_dict[v] = k
