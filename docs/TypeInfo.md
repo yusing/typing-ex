@@ -21,8 +21,9 @@ int_info = TypeInfo[int]
 # For a generic type
 list_int_info = TypeInfo[List[int]]
 
-# For a union type (Python 3.10+)
-union_info = TypeInfo[int | str]
+# For a union type
+union_info = TypeInfo[Union[int, str]] # (Python < 3.10)
+union_info = TypeInfo[int | str] # (Python 3.10+)
 
 # Using the get() method
 dict_info = TypeInfo.get(Dict[str, int])
@@ -56,8 +57,9 @@ assert TypeInfo[int].check_value(10)
 # Work with generic types
 assert TypeInfo[List[int]].check_value([1, 2, 3])
 
-# Union types (Python 3.10+)
-assert TypeInfo[int | str].check_value("hello")
+# Union types
+assert TypeInfo[int | str].check_value("hello") # (Python 3.10+)
+assert TypeInfo[Union[int, str]] .check_value("hello") # (Python < 3.10)
 
 # Nested types
 assert TypeInfo[Dict[str, List[int]]].check_value({"numbers": [1, 2, 3]})

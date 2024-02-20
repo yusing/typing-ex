@@ -16,7 +16,7 @@ To use [EnumEx](../typing_ex/enum_ex.py), define a subclass of [EnumEx](../typin
 from typing_ex.enum_ex import EnumEx
 
 class MyEnum(EnumEx):
-    __value_type__ = str  # Optional: Specify value type
+    __value_type__ = str  # Optional: Specify value type (defaults to `int`)
     MEMBER1 = "value1"
     MEMBER2 = "value2"
     MEMBER1_ALIAS = MEMBER1  # Alias for MEMBER1
@@ -46,6 +46,7 @@ Iterating over an `EnumEx` class will yield all non-alias members.
 ```python
 for member in MyEnum:
     print(member)
+# Output: MEMBER1, MEMBER2
 ```
 
 ### Enum Class Properties
@@ -58,6 +59,8 @@ for member in MyEnum:
 ## Error Handling
 
 Attempting to access an undefined member will raise an `AttributeError`.
+Attempting to compare enum member to non enum members or non `value_type` values will raise an `ValueError`
+Attempting to assign a enum member that does not match `__value_type__` will raise an `ValueError`
 
 ## Notes
 
