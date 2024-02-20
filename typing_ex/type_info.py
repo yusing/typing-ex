@@ -69,8 +69,10 @@ def _get_unaliased_type(t: type) -> type:
 
 
 if sys.version_info >= (3, 10):
+
     def _construct_generic(t: type, args: Tuple[type, ...]) -> type:
         return t[args]
+
 else:
 
     def _construct_generic(t: type, args: Tuple[type, ...]) -> type:
@@ -186,8 +188,7 @@ class TypeInfo(type, metaclass=TypeInfoMeta):
     @property
     def is_sequence(cls) -> bool:
         return _is_subclass(cls.origin, Sequence)
-    
-    @property
+
     def is_subclass(cls, t_super: AnyType) -> bool:
         return _is_subclass(cls.origin, t_super)
 

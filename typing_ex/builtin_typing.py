@@ -61,7 +61,6 @@ __all__ = [
     "MutableSequence",
     "MutableMapping",
     "MutableSet",
-    "FrozenSet",
     "Callable",
     "Generic",
     "Generator",
