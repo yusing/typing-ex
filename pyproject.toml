@@ -1,6 +1,6 @@
 [project]
 name = "typing_ex"
-version = "0.1.32"
+version = "0.1.33"
 description = "A package for extended built-in types"
 authors = [{ name = "yusing", email = "yusing.wys@gmail.com" }]
 dependencies = ["typing-extensions>=4.9.0"]
@@ -16,10 +16,12 @@ dev = [
     "flake8-bugbear>=23.3.12",
     "flake8-mypy>=17.8.0",
     "flake8-builtins>=2.2.0",
-    "coverage>=7.4.1",
     "mypy>=1.8.0",
 ]
-test = ["pytest>=8.0.1"]
+test = [
+    "pytest>=8.0.1", 
+    "coverage>=7.4.1"
+]
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
