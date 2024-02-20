@@ -1,8 +1,6 @@
-# typing_ex
+# typing-ex
 
 ## A python package for extended `typing` (python 3.8+)
-
-Notice: Even with all tests passed, unexpected bugs might occur on edge cases
 
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=yusing_typing-ex&metric=coverage)](https://sonarcloud.io/summary/new_code?id=yusing_typing-ex)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=yusing_typing-ex&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=yusing_typing-ex)
@@ -13,6 +11,13 @@ Notice: Even with all tests passed, unexpected bugs might occur on edge cases
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=yusing_typing-ex&metric=bugs)](https://sonarcloud.io/summary/new_code?id=yusing_typing-ex)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=yusing_typing-ex&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=yusing_typing-ex)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=yusing_typing-ex&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=yusing_typing-ex)
+
+## Installation
+`pip install typing-ex`
+
+## Notice
+
+Even with all tests passed, unexpected bugs might occur on edge cases
 
 ## Frozen *[frozen.py](typing_ex/frozen.py)*
 
