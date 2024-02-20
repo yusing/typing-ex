@@ -163,3 +163,4 @@ cython_debug/
 .pdm-*
 
 src/typing_ex/experimental.py
+reddit.md

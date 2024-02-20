@@ -14,13 +14,31 @@ Notice: Even with all tests passed, unexpected bugs might occur on edge cases
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=yusing_typing-ex&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=yusing_typing-ex)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=yusing_typing-ex&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=yusing_typing-ex)
 
-## Frozen *[frozen.py](typing_ex/frozen.py)*
+## Project Overview
+
+I made this for fun, and also as a dependency for my other project [docker-playbook](https://github.com/yusing/docker-playbook) (working in progress).
+
+If you found any bug, or have any suggestions, please let me know.
+
+## Comparison
+
+[typeguard](https://github.com/agronholm/typeguard) provides runtime type checking for functions and class methods with `@typeguard` decorator. This project aims to enforce type annotation instead.
+
+[mypy](https://github.com/python/mypy) provides static type checking, a good companion for this project to provide both static and runtime type checking.
+
+## Modules/Classes
+
+All Docs in [docs](docs/) (AI generated with small modification, may be incomplete)
+
+### Frozen *[frozen.py](typing_ex/frozen.py)*
 
 - `FrozenList`: Immutable `list`
 - `FrozenDict`: Immutable `dict`
 - `frozen_copy`: Create frozen copy of supported types (`Sequence`, `Set`, `Mapping`)
 
-## TypeInfo *[type_info.py](typing_ex/type_info.py)* [Documentation](docs/TypeInfo.md)
+### TypeInfo *[type_info.py](typing_ex/type_info.py)* [Documentation](docs/TypeInfo.md)
+
+#### No more `isinstance`, `issubclass`, `is`, `==` mess
 
 - `TypeInfo`: provide type information and run-time type checking
   - `TypeInfo.get(t)`: alias of `TypeInfo[t]`
@@ -33,9 +51,9 @@ Notice: Even with all tests passed, unexpected bugs might occur on edge cases
   - `TypeInfo[t].check_value(value)`: check if value matches the type in type info
   - `TypeInfo[t].is_*`: check if type is _
 
-## TypedDefaultDict *[typed_defaultdict.py](typing_ex/typed_defaultdict.py)* [Documentation](docs/TypedDefaultDict.md)
+### TypedDefaultDict *[typed_defaultdict.py](typing_ex/typed_defaultdict.py)* [Documentation](docs/TypedDefaultDict.md)
 
-- `TypedDefaultDict`: combining features of `TypedDict` and `defaultdict` with type checking in `__init__`, `__setitem__`, `__setattr__` and `update`
+- `TypedDefaultDict`: combining features of `TypedDict` and `defaultdict` with type checking in `__init__`, `__setitem__`, `__setattr__` and `update()`
   - `TypedDefaultDict.schema`: the schema dictionary: `MappingProxyType[str, NamedTuple[default: Any, type:TypeInfo]]`
   - `TypedDefaultDict.on_get_unknown_property`: called on getting unknown property
   - `TypedDefaultDict.on_set_unknown_property`: called on setting unknown property
@@ -44,9 +62,11 @@ Notice: Even with all tests passed, unexpected bugs might occur on edge cases
 
 - Attributes without type annotation or starting with underscore "_" will be treated as class variables
 
-- Good for writing schema as a class for `JSON`/`YAML`/`XML`/etc. data which provides both static and runtime type checking. Or you can use it as a `class`, but without the need to write `__init__`
+- Good for writing schema as a class for `JSON`/`YAML`/`XML`/etc. data which provides both static and runtime type checking.
 
-## EnumEx *[enum_ex.py](typing_ex/enum_ex.py)* [Documentation](docs/EnumEx.md)
+- You can use it to make new classes too, no more `__init__()`!
+
+### EnumEx *[enum_ex.py](typing_ex/enum_ex.py)* [Documentation](docs/EnumEx.md)
 
 - `EnumEx` is a `Enum` like class that support enum aliasing (keeping same value but different name).
   - `EnumEx.__iter__`: a generator of all non-alias enum instances.
@@ -59,3 +79,8 @@ Notice: Even with all tests passed, unexpected bugs might occur on edge cases
   - `EnumEx.X.name`: name of enum X (i.e. X)
   - `EnumEx.X_ALIAS.orig_name`: original name of enum X_ALIAS (i.e. X)
   - `EnumEx.X_ALIAS.origin`: origin enum of X_ALIAS (i.e. EnumEx.X)
+
+## RoadMap
+
+- [ ] Test coverage GitHub workflow
+- [ ] Better documentation
