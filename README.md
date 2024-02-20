@@ -40,6 +40,44 @@ People who want more strict type checking and less runtime errors / bugs.
 
 All Docs in [docs](docs/) (AI generated with small modification, may be incomplete)
 
+### TypedDefaultDict *[typed_defaultdict.py](typing_ex/typed_defaultdict.py)* [Documentation](docs/TypedDefaultDict.md)
+
+`TypedDefaultDict` combines features of `TypedDict` and `defaultdict` with type checking in `__init__`, `__setitem__`, `__setattr__` and `update()`, similar to `pydantic.BaseModel`.
+
+Attributes without type annotation or starting with underscore "_" will be treated as class variables
+
+Good for writing schema as a class for `JSON`/`YAML`/`XML`/etc. data which provides both static and runtime type checking.
+
+- `TypedDefaultDict.schema`: the schema dictionary: `MappingProxyType[str, NamedTuple[default: Any, type:TypeInfo]]`
+- `TypedDefaultDict.on_get_unknown_property`: called on getting unknown property
+- `TypedDefaultDict.on_set_unknown_property`: called on setting unknown property
+- `TypedDefaultDict.set`: set a property to a value without property check and type check
+- `@factorymethod(property_name: str)`: defines a factory method for property
+
+```python
+class OtherClass:
+    def __self__(self, s_list: List[str]):
+        ...
+
+class MyModel(TypedDefaultDict):
+    key1: str = "default value"
+    key2: Optional[int] 
+    complex_key: SomeClass
+
+    @factorymethod("complex_key")
+    def complex_key_factory(value: List[str]) -> OtherClass:
+        return OtherClass(value)
+
+my_dict = MyModel(key1="value1", complex_key=["1", "2", "3"])
+# or dict way
+my_dict = MyModel({
+    "key1": "value1",
+    "complex_key": ["1", "2", "3"]
+})
+print(my_dict["key1"])  # Output: value1
+print(my_dict.complex_key)  # Output: By definition of OtherClass
+```
+
 ### TypeInfo *[type_info.py](typing_ex/type_info.py)* [Documentation](docs/TypeInfo.md)
 
 `TypeInfo` provides type information and run-time type checking, no more `isinstance`, `issubclass`, `is`, `==` mess.
@@ -57,24 +95,6 @@ Useful when you want to check / assert variable type in runtime.
 - `TypeInfo[t].name`: name of type (including arguments)
 - `TypeInfo[t].check_value(value)`: check if value matches the type in type info
 - `TypeInfo[t].is_*`: check if type is _
-
-### TypedDefaultDict *[typed_defaultdict.py](typing_ex/typed_defaultdict.py)* [Documentation](docs/TypedDefaultDict.md)
-
-`TypedDefaultDict` combines features of `TypedDict` and `defaultdict` with type checking in `__init__`, `__setitem__`, `__setattr__` and `update()`
-
-It is similar to `pydantic.BaseModel`
-
-- `TypedDefaultDict.schema`: the schema dictionary: `MappingProxyType[str, NamedTuple[default: Any, type:TypeInfo]]`
-- `TypedDefaultDict.on_get_unknown_property`: called on getting unknown property
-- `TypedDefaultDict.on_set_unknown_property`: called on setting unknown property
-- `TypedDefaultDict.set`: set a property to a value without property check and type check
-- `@factorymethod(property_name: str)`: defines a factory method for property
-
-- Attributes without type annotation or starting with underscore "_" will be treated as class variables
-
-- Good for writing schema as a class for `JSON`/`YAML`/`XML`/etc. data which provides both static and runtime type checking.
-
-- You can use it to make new classes too, no more `__init__()`!
 
 ### EnumEx *[enum_ex.py](typing_ex/enum_ex.py)* [Documentation](docs/EnumEx.md)
 
