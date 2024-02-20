@@ -1,8 +1,6 @@
-# typing_ex
+# typing-ex
 
 ## A python package for extended `typing` (python 3.8+)
-
-Notice: Even with all tests passed, unexpected bugs might occur on edge cases
 
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=yusing_typing-ex&metric=coverage)](https://sonarcloud.io/summary/new_code?id=yusing_typing-ex)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=yusing_typing-ex&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=yusing_typing-ex)
@@ -13,6 +11,10 @@ Notice: Even with all tests passed, unexpected bugs might occur on edge cases
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=yusing_typing-ex&metric=bugs)](https://sonarcloud.io/summary/new_code?id=yusing_typing-ex)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=yusing_typing-ex&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=yusing_typing-ex)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=yusing_typing-ex&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=yusing_typing-ex)
+
+## Notice
+
+Even with all tests passed, unexpected bugs might occur on edge cases
 
 ## Project Overview
 
@@ -25,6 +27,10 @@ If you found any bug, or have any suggestions, please let me know.
 [typeguard](https://github.com/agronholm/typeguard) provides runtime type checking for functions and class methods with `@typeguard` decorator. This project aims to enforce type annotation instead.
 
 [mypy](https://github.com/python/mypy) provides static type checking, a good companion for this project to provide both static and runtime type checking.
+
+## Installation
+
+`pip install typing-ex`
 
 ## Modules/Classes
 
@@ -79,8 +85,3 @@ All Docs in [docs](docs/) (AI generated with small modification, may be incomple
   - `EnumEx.X.name`: name of enum X (i.e. X)
   - `EnumEx.X_ALIAS.orig_name`: original name of enum X_ALIAS (i.e. X)
   - `EnumEx.X_ALIAS.origin`: origin enum of X_ALIAS (i.e. EnumEx.X)
-
-## RoadMap
-
-- [ ] Test coverage GitHub workflow
-- [ ] Better documentation
